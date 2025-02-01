@@ -116,6 +116,21 @@ resource "azurerm_network_interface" "B193_public_nic" {
   }
 }
 
+resource "azurerm_network_interface" "B193_bastion_nic" {
+  name                = "B193-bastion-nic"
+  location            = azurerm_resource_group.B193.location
+  resource_group_name = azurerm_resource_group.B193.name
+  depends_on = [
+    azurerm_subnet.B193_subnet
+  ]
+  ip_configuration {
+    name                          = "B193-bastion-ip-config"
+    subnet_id                     = azurerm_subnet.B193_subnet.id
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.B193_nat_pip.id
+  }
+}
+
 resource "azurerm_network_interface_security_group_association" "B193_nic_nsg" {
   network_interface_id      = azurerm_network_interface.B193_nic.id
   network_security_group_id = azurerm_network_security_group.B193_nsg.id
@@ -123,6 +138,11 @@ resource "azurerm_network_interface_security_group_association" "B193_nic_nsg" {
 
 resource "azurerm_network_interface_security_group_association" "B193_public_nic_nsg" {
   network_interface_id      = azurerm_network_interface.B193_public_nic.id
+  network_security_group_id = azurerm_network_security_group.B193_nsg.id
+}
+
+resource "azurerm_network_interface_security_group_association" "B193_bastion_nic_nsg" {
+  network_interface_id      = azurerm_network_interface.B193_bastion_nic.id
   network_security_group_id = azurerm_network_security_group.B193_nsg.id
 }
 
@@ -224,7 +244,7 @@ resource "azurerm_linux_virtual_machine" "B193_bastion_vm" {
   admin_password      = "YourSecurePassword123!"
   disable_password_authentication = false
   network_interface_ids = [
-    azurerm_network_interface.B193_public_nic.id,
+    azurerm_network_interface.B193_bastion_nic.id,
   ]
   os_disk {
     name                = "B193-bastion-os-disk-${random_string.suffix.result}"
