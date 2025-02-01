@@ -1,0 +1,7 @@
+<file> 
+```plaintext 
+# filepath: /c:/Users/Yoga/OneDrive/Cloud/AZURE/Terraform/POC-1/.gitattributes 
+*.tf text eol=lf 
+*.tfstate text eol=lf 
+``` 
+</file>
